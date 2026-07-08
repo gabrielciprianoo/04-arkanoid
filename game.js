@@ -235,11 +235,18 @@ function updateBall() {
   }
 }
 
+function checkVictory() {
+  if ( gameState.blocks.every( ( block ) => block.destroyed ) ) {
+    gameState.state = 'victory';
+  }
+}
+
 function update() {
   if ( gameState.state === 'playing' ) {
     updatePaddle();
     updateBall();
     updateExplosions();
+    checkVictory();
   }
 }
 
