@@ -291,6 +291,14 @@ function drawPlaying() {
       drawSprite( ctx, `block_${ block.color }`, block.x, block.y, block.width, block.height );
     }
   } );
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText( `Score: ${ gameState.score }`, 10, 24 );
+
+  ctx.textAlign = 'right';
+  ctx.fillText( `Lives: ${ gameState.lives }`, CANVAS_WIDTH - 10, 24 );
 }
 
 function render() {
