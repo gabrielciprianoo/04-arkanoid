@@ -1,6 +1,6 @@
 # Spec 01: MVP Jugable de Arkanoid
 
-**Estado:** Draft
+**Estado:** Aprobado
 **Dependencias:** Ninguna (usa assets existentes: `assets/spritesheet.js`, `assets/spritesheet-breakout.png`, `assets/sounds/`)
 **Fecha:** 2026-07-07
 
