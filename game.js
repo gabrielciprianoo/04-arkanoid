@@ -63,10 +63,16 @@ window.addEventListener( 'keyup', ( e ) => { keys[ e.key ] = false; } );
 
 // --- Sonidos ---
 const sndBounce = new Audio( 'assets/sounds/ball-bounce.mp3' );
+const sndBreak = new Audio( 'assets/sounds/break-sound.mp3' );
 
 function playBounce() {
   sndBounce.currentTime = 0;
   sndBounce.play();
+}
+
+function playBreak() {
+  sndBreak.currentTime = 0;
+  sndBreak.play();
 }
 
 // --- Ball ---
@@ -150,6 +156,48 @@ function checkPaddleCollision() {
   return true;
 }
 
+function checkBlockCollision() {
+  const b = gameState.ball;
+
+  for ( const block of gameState.blocks ) {
+    if ( block.destroyed ) continue;
+
+    const closestX = Math.max( block.x, Math.min( b.x, block.x + block.width ) );
+    const closestY = Math.max( block.y, Math.min( b.y, block.y + block.height ) );
+    const dx = b.x - closestX;
+    const dy = b.y - closestY;
+
+    if ( dx * dx + dy * dy > b.radius * b.radius ) continue;
+
+    const overlapX = b.radius - Math.abs( dx );
+    const overlapY = b.radius - Math.abs( dy );
+    if ( overlapX < overlapY ) {
+      b.dx *= -1;
+    } else {
+      b.dy *= -1;
+    }
+
+    block.destroyed = true;
+    block.exploding = true;
+    block.explosionStartTime = Date.now();
+    gameState.score += block.points;
+    playBreak();
+
+    return true; // procesa una sola colisión de bloque por frame (evita rebote errático)
+  }
+
+  return false;
+}
+
+function updateExplosions() {
+  const now = Date.now();
+  gameState.blocks.forEach( ( block ) => {
+    if ( block.exploding && now - block.explosionStartTime >= EXPLOSION_DURATION * 4 ) {
+      block.exploding = false;
+    }
+  } );
+}
+
 function updateBall() {
   const b = gameState.ball;
   b.x += b.dx;
@@ -175,6 +223,8 @@ function updateBall() {
     playBounce();
   }
 
+  checkBlockCollision();
+
   if ( b.y - b.radius > CANVAS_HEIGHT ) {
     gameState.lives -= 1;
     if ( gameState.lives <= 0 ) {
@@ -189,6 +239,7 @@ function update() {
   if ( gameState.state === 'playing' ) {
     updatePaddle();
     updateBall();
+    updateExplosions();
   }
 }
 
@@ -225,8 +276,13 @@ function drawPlaying() {
   drawSprite( ctx, 'ball', b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2 );
 
   gameState.blocks.forEach( ( block ) => {
-    if ( block.destroyed ) return;
-    drawSprite( ctx, `block_${ block.color }`, block.x, block.y, block.width, block.height );
+    if ( block.exploding ) {
+      const elapsed = Date.now() - block.explosionStartTime;
+      const frameIndex = Math.min( 3, Math.floor( elapsed / EXPLOSION_DURATION ) );
+      drawFrame( ctx, EXPLOSION_FRAMES[ block.color ][ frameIndex ], block.x, block.y, block.width, block.height );
+    } else if ( !block.destroyed ) {
+      drawSprite( ctx, `block_${ block.color }`, block.x, block.y, block.width, block.height );
+    }
   } );
 }
 
