@@ -310,11 +310,42 @@ function drawPlaying() {
   ctx.fillText( `Lives: ${ gameState.lives }`, CANVAS_WIDTH - 10, 24 );
 }
 
+function drawEndScreen( title, color ) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect( 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
+
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = color;
+  ctx.font = 'bold 40px sans-serif';
+  ctx.fillText( title, CANVAS_WIDTH / 2, 260 );
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '22px sans-serif';
+  ctx.fillText( `Score: ${ gameState.score }`, CANVAS_WIDTH / 2, 320 );
+  ctx.fillText( `High Score: ${ gameState.highScore }`, CANVAS_WIDTH / 2, 356 );
+
+  ctx.font = '16px sans-serif';
+  ctx.fillText( 'Recarga la página para reintentar', CANVAS_WIDTH / 2, 410 );
+}
+
+function drawGameOverScreen() {
+  drawEndScreen( 'GAME OVER', '#e33' );
+}
+
+function drawVictoryScreen() {
+  drawEndScreen( 'VICTORY', '#3e6' );
+}
+
 function render() {
   if ( gameState.state === 'start' ) {
     drawStartScreen();
   } else if ( gameState.state === 'playing' ) {
     drawPlaying();
+  } else if ( gameState.state === 'gameover' ) {
+    drawGameOverScreen();
+  } else if ( gameState.state === 'victory' ) {
+    drawVictoryScreen();
   }
 }
 
