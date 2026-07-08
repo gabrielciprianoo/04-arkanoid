@@ -229,15 +229,24 @@ function updateBall() {
     gameState.lives -= 1;
     if ( gameState.lives <= 0 ) {
       gameState.state = 'gameover';
+      saveHighScoreIfNeeded();
     } else {
       resetBall();
     }
   }
 }
 
+function saveHighScoreIfNeeded() {
+  if ( gameState.score > gameState.highScore ) {
+    gameState.highScore = gameState.score;
+    localStorage.setItem( HIGHSCORE_KEY, String( gameState.highScore ) );
+  }
+}
+
 function checkVictory() {
   if ( gameState.blocks.every( ( block ) => block.destroyed ) ) {
     gameState.state = 'victory';
+    saveHighScoreIfNeeded();
   }
 }
 
