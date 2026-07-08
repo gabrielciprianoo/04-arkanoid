@@ -25,6 +25,12 @@ const BALL_RADIUS = 8;
 const BALL_SPEED = 4;
 const PADDLE_MAX_BOUNCE_ANGLE = Math.PI * ( 60 / 180 ); // clamp: evita rebote casi horizontal
 
+const BLOCK_WIDTH = 56;
+const BLOCK_HEIGHT = 20;
+const BLOCK_GAP = 4;
+const BLOCK_OFFSET_TOP = 60;
+const BLOCK_OFFSET_LEFT = ( CANVAS_WIDTH - ( GRID_COLS * BLOCK_WIDTH + ( GRID_COLS - 1 ) * BLOCK_GAP ) ) / 2;
+
 // --- Canvas ---
 const canvas = document.getElementById( 'game' );
 const ctx = canvas.getContext( '2d' );
@@ -77,6 +83,30 @@ function resetBall() {
 }
 
 resetBall();
+
+// --- Blocks ---
+function createBlocks() {
+  const blocks = [];
+  for ( let row = 0; row < GRID_ROWS; row++ ) {
+    for ( let col = 0; col < GRID_COLS; col++ ) {
+      const color = BLOCK_COLORS[ ( row * GRID_COLS + col ) % BLOCK_COLORS.length ];
+      blocks.push( {
+        x: BLOCK_OFFSET_LEFT + col * ( BLOCK_WIDTH + BLOCK_GAP ),
+        y: BLOCK_OFFSET_TOP + row * ( BLOCK_HEIGHT + BLOCK_GAP ),
+        width: BLOCK_WIDTH,
+        height: BLOCK_HEIGHT,
+        color,
+        points: BLOCK_POINTS[ color ],
+        destroyed: false,
+        exploding: false,
+        explosionStartTime: 0,
+      } );
+    }
+  }
+  gameState.blocks = blocks;
+}
+
+createBlocks();
 
 function isInsideButton( px, py, btn ) {
   return px >= btn.x && px <= btn.x + btn.width && py >= btn.y && py <= btn.y + btn.height;
@@ -193,6 +223,11 @@ function drawPlaying() {
 
   const b = gameState.ball;
   drawSprite( ctx, 'ball', b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2 );
+
+  gameState.blocks.forEach( ( block ) => {
+    if ( block.destroyed ) return;
+    drawSprite( ctx, `block_${ block.color }`, block.x, block.y, block.width, block.height );
+  } );
 }
 
 function render() {
